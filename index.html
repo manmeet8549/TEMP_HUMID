@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Environmental Monitoring Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- LOGIN PAGE -->
+  <div id="loginPage" class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <h1>Environmental Monitoring</h1>
+        <p>Sign in to access your zone dashboard</p>
+      </div>
+      <form id="loginForm" class="login-form">
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" placeholder="Enter your email" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="Enter your password" required>
+        </div>
+        <div id="errorMessage" class="error-message"></div>
+        <button type="submit" class="login-button">Sign In</button>
+      </form>
+      <div class="login-footer">
+        <p>Demo Credentials:</p>
+        <p class="credentials">Email: user@gmail.com / Password: 1234</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD (hidden initially) -->
+  <div id="dashboardPage" class="dashboard-page" style="display: none;">
+    <header class="pageHeader">
+      <div>
+        <div class="eyebrow">Monitoring</div>
+        <h1 class="title">Environmental Monitoring Dashboard</h1>
+      </div>
+      <div class="headerRight">
+        <div class="zone-selector-wrapper">
+          <label for="zoneSelector" class="zone-selector-label">Zone:</label>
+          <select id="zoneSelector" class="zone-selector-header">
+            <option value="A">Zone 1</option>
+            <option value="B">Zone 2</option>
+            <option value="C">Zone 3</option>
+          </select>
+        </div>
+        <span id="userInfo" class="user-info"></span>
+        <button id="darkModeToggle" class="iconBtn dark-toggle" aria-label="Toggle Dark Mode">
+          <span class="dark-icon">🌙</span>
+          <span class="light-icon" style="display: none;">☀️</span>
+        </button>
+        <button id="logoutBtn" class="iconBtn" aria-label="Logout">Logout</button>
+      </div>
+    </header>
+
+    <section class="zone-container" id="zoneContainer">
+      <!-- Zone panel will be injected here -->
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- Toast container -->
+<div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+  <script src="script.js"></script>
+</body>
+</html>
