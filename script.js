@@ -1,18 +1,18 @@
 /* =========================================================
-   USER LOGIN (DEMO)
+   DEMO LOGIN CREDENTIALS
 ========================================================= */
 const userCredentials = {
   "user@gmail.com": { password: "1234" }
 };
 
 /* =========================================================
-   THINGSPEAK CONFIG (READ ONLY)
+   THINGSPEAK CONFIG (READ ONLY – CLOUD SAFE)
 ========================================================= */
 const THINGSPEAK_URL =
   "https://api.thingspeak.com/channels/3235139/feeds/last.json?api_key=D335IVKX60TK0MCY";
 
 /* =========================================================
-   ZONE DATA (Zone A = REAL DATA FROM ESP via ThingSpeak)
+   ZONE DATA
 ========================================================= */
 const zones = {
   A: {
@@ -20,15 +20,13 @@ const zones = {
     deviceStatus: {
       online: true,
       lastSeen: new Date(),
-      rssi: "-",
       dataQuality: "Cloud"
     },
     metrics: [
-      { title: "Temperature", value: "--", unit: "°C", icon: "🌡️", color: "var(--amber)" },
-      { title: "Humidity", value: "--", unit: "%", icon: "💧", color: "var(--blue)" }
+      { title: "Temperature", value: "--", unit: "°C", icon: "🌡️" },
+      { title: "Humidity", value: "--", unit: "%", icon: "💧" }
     ],
-    comfortIndex: { score: "Waiting for data" },
-    ai: "Fetching data from ESP8266 via ThingSpeak...",
+    ai: "Waiting for data from ESP8266...",
     chartTitle: "Temperature & Humidity (Cloud)",
     chartSeries: {
       labels: [],
@@ -39,22 +37,20 @@ const zones = {
 
   B: {
     name: "Zone 2 (Demo)",
-    deviceStatus: { online: false },
     metrics: [
-      { title: "Temperature", value: 24.5, unit: "°C", icon: "🌡️", color: "var(--amber)" },
-      { title: "Humidity", value: 85, unit: "%", icon: "💧", color: "var(--blue)" }
+      { title: "Temperature", value: 24.5, unit: "°C", icon: "🌡️" },
+      { title: "Humidity", value: 85, unit: "%", icon: "💧" }
     ],
-    ai: "Demo data only."
+    ai: "Demo data only"
   },
 
   C: {
     name: "Zone 3 (Demo)",
-    deviceStatus: { online: false },
     metrics: [
-      { title: "Temperature", value: -2, unit: "°C", icon: "🥶", color: "var(--cyan)" },
-      { title: "Humidity", value: 38, unit: "%", icon: "💧", color: "var(--blue)" }
+      { title: "Temperature", value: -2, unit: "°C", icon: "🥶" },
+      { title: "Humidity", value: 38, unit: "%", icon: "💧" }
     ],
-    ai: "Demo data only."
+    ai: "Demo data only"
   }
 };
 
@@ -62,25 +58,25 @@ let currentZone = "A";
 let chartInstance = null;
 
 /* =========================================================
-   DOM HELPERS
+   DOM ELEMENTS
 ========================================================= */
-const zoneContainer = document.getElementById("zoneContainer");
-const zoneSelector = document.getElementById("zoneSelector");
 const loginForm = document.getElementById("loginForm");
 const loginPage = document.getElementById("loginPage");
 const dashboardPage = document.getElementById("dashboardPage");
 const errorMessage = document.getElementById("errorMessage");
 const logoutBtn = document.getElementById("logoutBtn");
 const userInfo = document.getElementById("userInfo");
+const zoneContainer = document.getElementById("zoneContainer");
+const zoneSelector = document.getElementById("zoneSelector");
 
 /* =========================================================
-   LOGIN LOGIC
+   LOGIN LOGIC (FIXED)
 ========================================================= */
 loginForm.addEventListener("submit", e => {
   e.preventDefault();
 
-  const email = email.value = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
 
   if (
     userCredentials[email] &&
@@ -89,10 +85,13 @@ loginForm.addEventListener("submit", e => {
     loginPage.style.display = "none";
     dashboardPage.style.display = "block";
     userInfo.textContent = email;
+
+    errorMessage.classList.remove("show");
+
     loadZone("A");
     fetchThingSpeakData();
   } else {
-    errorMessage.textContent = "Invalid credentials";
+    errorMessage.textContent = "Invalid email or password";
     errorMessage.classList.add("show");
   }
 });
@@ -100,7 +99,7 @@ loginForm.addEventListener("submit", e => {
 logoutBtn.addEventListener("click", () => location.reload());
 
 /* =========================================================
-   BUILD UI
+   BUILD DASHBOARD UI
 ========================================================= */
 function buildPanel(zoneKey) {
   const zone = zones[zoneKey];
@@ -132,15 +131,17 @@ function buildPanel(zoneKey) {
   `;
   panel.appendChild(aiCard);
 
-  const chartCard = document.createElement("div");
-  chartCard.className = "card";
-  chartCard.innerHTML = `
-    <div class="cardTitle">${zone.chartTitle}</div>
-    <div class="chartWrap tall">
-      <canvas id="mainChart"></canvas>
-    </div>
-  `;
-  panel.appendChild(chartCard);
+  if (zoneKey === "A") {
+    const chartCard = document.createElement("div");
+    chartCard.className = "card";
+    chartCard.innerHTML = `
+      <div class="cardTitle">${zone.chartTitle}</div>
+      <div class="chartWrap tall">
+        <canvas id="mainChart"></canvas>
+      </div>
+    `;
+    panel.appendChild(chartCard);
+  }
 
   return panel;
 }
@@ -152,13 +153,14 @@ function loadZone(zoneKey) {
   currentZone = zoneKey;
   zoneContainer.innerHTML = "";
   zoneContainer.appendChild(buildPanel(zoneKey));
-  initChart();
+
+  if (zoneKey === "A") initChart();
 }
 
 zoneSelector.addEventListener("change", e => loadZone(e.target.value));
 
 /* =========================================================
-   CHART
+   CHART.JS
 ========================================================= */
 function initChart() {
   const canvas = document.getElementById("mainChart");
@@ -172,13 +174,13 @@ function initChart() {
       labels: zones.A.chartSeries.labels,
       datasets: [
         {
-          label: "Temperature",
+          label: "Temperature (°C)",
           data: zones.A.chartSeries.temp,
           borderColor: "#f59e0b",
           tension: 0.3
         },
         {
-          label: "Humidity",
+          label: "Humidity (%)",
           data: zones.A.chartSeries.humidity,
           borderColor: "#60a5fa",
           tension: 0.3
@@ -193,7 +195,7 @@ function initChart() {
 }
 
 /* =========================================================
-   THINGSPEAK FETCH (CLOUD SAFE)
+   FETCH DATA FROM THINGSPEAK
 ========================================================= */
 async function fetchThingSpeakData() {
   try {
@@ -207,10 +209,9 @@ async function fetchThingSpeakData() {
     zones.A.metrics[0].value = temp;
     zones.A.metrics[1].value = hum;
     zones.A.ai = `ESP Mode: ${mode.toUpperCase()}`;
-    zones.A.deviceStatus.lastSeen = new Date();
 
-    // chart update
     const time = new Date(data.created_at).toLocaleTimeString();
+
     zones.A.chartSeries.labels.push(time);
     zones.A.chartSeries.temp.push(temp);
     zones.A.chartSeries.humidity.push(hum);
@@ -221,17 +222,15 @@ async function fetchThingSpeakData() {
       zones.A.chartSeries.humidity.shift();
     }
 
-    if (currentZone === "A") {
-      loadZone("A");
-    }
+    if (currentZone === "A") loadZone("A");
 
   } catch (err) {
-    zones.A.ai = "Unable to fetch ThingSpeak data";
+    zones.A.ai = "Unable to fetch data from ThingSpeak";
     console.warn("ThingSpeak fetch failed");
   }
 }
 
 /* =========================================================
-   AUTO REFRESH (ThingSpeak rule: ≥15s)
+   AUTO REFRESH (ThingSpeak limit ≥ 15s)
 ========================================================= */
 setInterval(fetchThingSpeakData, 16000);
